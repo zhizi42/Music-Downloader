@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ###########################################################################
-## Python code generated with wxFormBuilder (version Oct 26 2018)
+## Python code generated with wxFormBuilder (version 3.10.1-c831f1f)
 ## http://www.wxformbuilder.org/
 ##
 ## PLEASE DO *NOT* EDIT THIS FILE!
@@ -17,7 +17,7 @@ import wx.xrc
 class frame_main ( wx.Frame ):
 
     def __init__( self, parent ):
-        wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Music Downloader 2.0， by AI丿质子。", pos = wx.DefaultPosition, size = wx.Size( -1,-1 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
+        wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Music Downloader 2.5， by AI丿质子。", pos = wx.DefaultPosition, size = wx.Size( -1,-1 ), style = wx.CAPTION|wx.CLOSE_BOX|wx.MINIMIZE_BOX|wx.RESIZE_BORDER|wx.SYSTEM_MENU|wx.TAB_TRAVERSAL )
 
         self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
         self.SetBackgroundColour( wx.Colour( 236, 237, 232 ) )
@@ -54,6 +54,12 @@ class frame_main ( wx.Frame ):
 
         bSizer2.Add( ( 0, 0), 1, wx.EXPAND, 5 )
 
+        self.Button_open_ncm = wx.Button( self, wx.ID_ANY, u"ncm格式转换", wx.DefaultPosition, wx.Size( 100,30 ), 0 )
+        bSizer2.Add( self.Button_open_ncm, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
+
+
+        bSizer2.Add( ( 0, 0), 1, wx.EXPAND, 5 )
+
         self.Button_setting = wx.Button( self, wx.ID_ANY, u"设置", wx.DefaultPosition, wx.Size( 80,30 ), 0 )
         bSizer2.Add( self.Button_setting, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
 
@@ -71,18 +77,22 @@ class frame_main ( wx.Frame ):
         self.link_input.Bind( wx.EVT_TEXT_ENTER, self.download_main )
         self.Button_download.Bind( wx.EVT_BUTTON, self.download_main )
         self.Button_about.Bind( wx.EVT_BUTTON, self.show_about )
+        self.Button_open_ncm.Bind( wx.EVT_BUTTON, self.show_ncm )
         self.Button_setting.Bind( wx.EVT_BUTTON, self.show_setting )
 
     def __del__( self ):
         pass
 
 
-    # Virtual event handlers, overide them in your derived class
+    # Virtual event handlers, override them in your derived class
     def download_main( self, event ):
         event.Skip()
 
 
     def show_about( self, event ):
+        event.Skip()
+
+    def show_ncm( self, event ):
         event.Skip()
 
     def show_setting( self, event ):
@@ -96,7 +106,7 @@ class frame_main ( wx.Frame ):
 class frame_setting ( wx.Frame ):
 
     def __init__( self, parent ):
-        wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"设置", pos = wx.DefaultPosition, size = wx.Size( -1,-1 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
+        wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"设置", pos = wx.DefaultPosition, size = wx.Size( -1,-1 ), style = wx.CAPTION|wx.CLOSE_BOX|wx.MINIMIZE_BOX|wx.RESIZE_BORDER|wx.SYSTEM_MENU|wx.TAB_TRAVERSAL )
 
         self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
         self.SetBackgroundColour( wx.Colour( 236, 237, 232 ) )
@@ -202,7 +212,7 @@ class frame_setting ( wx.Frame ):
         pass
 
 
-    # Virtual event handlers, overide them in your derived class
+    # Virtual event handlers, override them in your derived class
     def setting_close( self, event ):
         event.Skip()
 
@@ -220,7 +230,7 @@ class frame_setting ( wx.Frame ):
 class frame_about ( wx.Frame ):
 
     def __init__( self, parent ):
-        wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"关于本程序", pos = wx.DefaultPosition, size = wx.Size( -1,-1 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
+        wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"关于本程序", pos = wx.DefaultPosition, size = wx.Size( -1,-1 ), style = wx.CAPTION|wx.CLOSE_BOX|wx.MINIMIZE_BOX|wx.RESIZE_BORDER|wx.SYSTEM_MENU|wx.TAB_TRAVERSAL )
 
         self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
         self.SetBackgroundColour( wx.Colour( 236, 237, 232 ) )
@@ -228,7 +238,7 @@ class frame_about ( wx.Frame ):
         bSizer9 = wx.BoxSizer( wx.VERTICAL )
 
         bSizer9.SetMinSize( wx.Size( 600,560 ) )
-        self.m_staticText5 = wx.StaticText( self, wx.ID_ANY, u"Music Downloader 2.0， by AI丿质子。\n特别感谢 鹿羽私，kurisu，luern0313，lzj。\n感谢rpONE为本程序制作了图标。感谢rpONE，莳昇，双霖等所有为本程序做出贡献的人。\n本程序非商业使用，仅因兴趣所作…网易云音乐不要起诉我啊，要是起诉我，我就…我就…我就哭给你看……有什么事情咱们商量着来好不好……\n如果您发现了程序的bug，或对程序有任何建议，（或者只是单纯的想来水群，）欢迎加入我们的QQ群！群号：820056900\n如果想让我们更加努力地把这个程序做得更好，可对我们进行投喂。可使用付款二维码，或直接转账给开发者的QQ。在此感谢所有投喂过开发者的人。\n投喂时推荐备注一下自己的昵称，否则使用付款账号的昵称。（每投喂一分钱开发者就会嘤嘤嘤一次哦！若需要，请私聊开发者领取）\n投喂名单：\n（按投喂时间排序，每次更新应用时这个名单也会更新）\nWindowsMEMZ\nkurisu\n今日龙王就是我\n阿易\n双霖\n温馨小聚\n邦邦\nlamJustDast", wx.DefaultPosition, wx.Size( 600,380 ), wx.ALIGN_CENTER_HORIZONTAL )
+        self.m_staticText5 = wx.StaticText( self, wx.ID_ANY, u"Music Downloader 2.5， by AI丿质子。\n特别感谢 kurisu，luern0313，lzj。\n感谢rpONE为本程序制作了图标。感谢rpONE，莳昇，双霖等所有为本程序做出贡献的人。\n本程序非商业使用，仅因兴趣所作…网易云音乐不要起诉我啊，要是起诉我，我就…我就…我就哭给你看……有什么事情咱们商量着来好不好……\n如果您发现了程序的bug，或对程序有任何建议，（或者只是单纯的想来水群，）欢迎加入我们的QQ群！群号：820056900\n如果想让我们更加努力地把这个程序做得更好，可对我们进行投喂。可使用付款二维码，或直接转账给开发者的QQ。在此感谢所有投喂过开发者的人。\n投喂时推荐备注一下自己的昵称，否则使用付款账号的昵称。（每投喂一分钱开发者就会嘤嘤嘤一次哦！若需要，请私聊开发者领取）\n投喂名单：\n（按投喂时间排序，每次更新应用时这个名单也会更新）\nWindowsMEMZ\nkurisu\n今日龙王就是我\n阿易\n双霖\n温馨小聚\n邦邦\nlamJustDast", wx.DefaultPosition, wx.Size( 600,380 ), wx.ALIGN_CENTER_HORIZONTAL )
         self.m_staticText5.Wrap( -1 )
 
         self.m_staticText5.SetFont( wx.Font( 12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, wx.EmptyString ) )
@@ -260,7 +270,7 @@ class frame_about ( wx.Frame ):
         pass
 
 
-    # Virtual event handlers, overide them in your derived class
+    # Virtual event handlers, override them in your derived class
     def show_give( self, event ):
         event.Skip()
 
@@ -333,8 +343,72 @@ class frame_downloading ( wx.Frame ):
         pass
 
 
-    # Virtual event handlers, overide them in your derived class
+    # Virtual event handlers, override them in your derived class
     def cancel_download( self, event ):
+        event.Skip()
+
+
+###########################################################################
+## Class frame_ncm
+###########################################################################
+
+class frame_ncm ( wx.Frame ):
+
+    def __init__( self, parent ):
+        wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 421,292 ), style = wx.CAPTION|wx.CLOSE_BOX|wx.MINIMIZE_BOX|wx.RESIZE_BORDER|wx.SYSTEM_MENU|wx.TAB_TRAVERSAL )
+
+        self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
+        self.SetBackgroundColour( wx.Colour( 236, 237, 232 ) )
+
+        bSizer12 = wx.BoxSizer( wx.VERTICAL )
+
+        bSizer12.SetMinSize( wx.Size( 500,250 ) )
+        self.listCtrl = wx.ListCtrl( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,-1 ), wx.LC_REPORT )
+        self.listCtrl.SetMinSize( wx.Size( 500,200 ) )
+
+        bSizer12.Add( self.listCtrl, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+
+        bSizer19 = wx.BoxSizer( wx.HORIZONTAL )
+
+        bSizer19.SetMinSize( wx.Size( -1,30 ) )
+        self.m_button19 = wx.Button( self, wx.ID_ANY, u"添加文件", wx.DefaultPosition, wx.Size( 80,30 ), 0 )
+        bSizer19.Add( self.m_button19, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+
+
+        bSizer19.Add( ( 0, 0), 1, wx.EXPAND, 5 )
+
+        self.gauge_all = wx.Gauge( self, wx.ID_ANY, 100, wx.DefaultPosition, wx.Size( 200,20 ), wx.GA_HORIZONTAL )
+        self.gauge_all.SetValue( 0 )
+        bSizer19.Add( self.gauge_all, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+
+
+        bSizer19.Add( ( 0, 0), 1, wx.EXPAND, 5 )
+
+        self.m_button18 = wx.Button( self, wx.ID_ANY, u"开始转换", wx.DefaultPosition, wx.Size( 80,30 ), 0 )
+        bSizer19.Add( self.m_button18, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+
+
+        bSizer12.Add( bSizer19, 1, wx.EXPAND, 5 )
+
+
+        self.SetSizer( bSizer12 )
+        self.Layout()
+
+        self.Centre( wx.BOTH )
+
+        # Connect Events
+        self.m_button19.Bind( wx.EVT_BUTTON, self.add_files )
+        self.m_button18.Bind( wx.EVT_BUTTON, self.start_convert )
+
+    def __del__( self ):
+        pass
+
+
+    # Virtual event handlers, override them in your derived class
+    def add_files( self, event ):
+        event.Skip()
+
+    def start_convert( self, event ):
         event.Skip()
 
 

@@ -1,10 +1,12 @@
 import json
+import multiprocessing
 import os
 import re
 import shutil
 import sys
 import threading
 import webbrowser
+from math import floor
 
 import mutagen.id3 as mi
 import requests
@@ -12,6 +14,7 @@ import wx
 
 import MD_img_py
 import MD_wx_GUI
+import ncm_dump
 
 
 def error(sentence):
@@ -37,8 +40,8 @@ def download(link, downloadpath, music_or_image):
 
 def download_lyric(id, path):
     if downloading_cancel:return
-    lyric_link = "https://api.imjad.cn/cloudmusic/?type=lyric&id={}".format(id)
-    lyric_dict = json.loads(requests.get(lyric_link, headers=HEADERS).text)
+    lyric_link = f"http://zhizi42.f3322.net:3000/lyric?id={id}"
+    lyric_dict = requests.get(lyric_link).json()
     if lyric_dict.get("nolyric"):
         error("错误原因：此歌曲没有歌词。")
     else:
@@ -49,51 +52,79 @@ def download_lyric(id, path):
         if lyric == "":
             error("错误原因：此歌曲没有歌词。")
             return
-        with open(path + ".lrc", "w") as lyric_file:
+        with open(path + ".lrc", "w", encoding="utf-8") as lyric_file:
             lyric_file.write(lyric)
             return True
 
 
-def download_name(id, path, number_now_and_all, id_type):
-    link = "https://music.163.com/song?id={}".format(id)
-    if downloading_cancel:return
+def get_info_and_start(path, id, id_type):
+    if id_type == "playlist":
+        req_json = requests.get(f"http://zhizi42.f3322.net:3000/playlist/detail?id={id}").json()
+        id_list = []
+        for i in req_json["playlist"]["tracks"]:
+            id_list.append(str(i["id"]))
+        ids = ",".join(id_list)
+    elif id_type == "song":
+        ids = id
     try:
-        htmlcode = requests.get(link).text
-    except:
-        error("错误原因：获取音乐信息失败。请检查网络是否正常。")
-        return
-    try:
-        name = re.search(r'data-res-name=".+"', htmlcode)
-        if name == None:
-            error("错误原因：未能找到该链接对应的歌曲名字。")
-            return
-        name = name.group().replace("amp;", "")[15:-1]
-        artist = re.search(r'data-res-author=".+"', htmlcode)
-        artist = artist.group().replace("amp;", "")[17:-1]
-        pattern = r"<meta property=\"og:music:album\" content=\".+\"/>"
-        album = re.search(pattern, htmlcode)
-        album = album.group().replace("amp;", "")[41:-3]
-        pattern = r"<meta property=\"og:image\" content=\".+\" />"
-        imagelink = re.search(pattern, htmlcode)
-        imagelink = imagelink.group()[35:-4] + "?param=640y640"
+        req_json = requests.get(f"http://zhizi42.f3322.net:3000/song/detail?ids={ids}").json()
+        if req_json["code"] == 200:
+            song_info_list = []
+            for i in req_json["songs"]:
+                id = i["id"]
+                name = i["name"]
+                artist_list = []
+                for a in i["ar"]:
+                    artist_list.append(a["name"])
+                artist = " , ".join(artist_list)
+                album = i["al"]["name"]
+                image_link = i["al"]["picUrl"] + "?param=640y640"
+                song_info_list.append([id, name, artist, album, image_link])
+        else:
+            raise
+        req_json = requests.get(f"http://zhizi42.f3322.net:3000/song/url?id={ids}").json()
+        none_url_list = []
+        for i in range(len(req_json["data"])):
+            url = req_json["data"][i]["url"]
+            if url == None:
+                error(f"获取第{i + 1}首音乐下载链接失败！")
+                none_url_list.append(i)
+            else:
+                song_info_list[i].append(url)
+        #musiclink = "http://music.163.com/song/media/outer/url?id={}".format(id)
     except:
         error("错误原因：程序在获取歌曲相关信息时遇到了错误。")
         return
+    num_all = len(song_info_list)
+    for i in range(num_all):
+        if i in none_url_list:
+            continue
+        download_succ = download_name(path, song_info_list[i], i, num_all)
+        if download_succ == None:
+            error(f"下崽第{i}首音乐失败！")
+    if id_type == "playlist":
+        download_done = "下载成攻！我绝对不是故意打错字的喵(^･ｪ･^)此歌单的音乐已保存至目录\n{}\n（若发现文件不正确，请在确认操作正确后联系开发者。）".format(path.replace("/", "\\"))
+    elif id_type == "song":
+        download_done = "下载成攻！我绝对不是故意打错字的喵(^･ｪ･^)音乐已保存为\n{}.mp3\n至目录  {}\n（若发现文件不正确，请在确认操作正确后联系开发者。）".format(song_info_list[0][1], path.replace("/", "\\"))
+    downloading_frame.set_text(download_done)
+
+
+def download_name(path, song_info, num_now, num_all):
+    id, name, artist, album, image_link, music_link = song_info
     if setting_dict["name_version_pc"] == True:
         musicname = artist.replace("/", ",") + " - " +  name
     else:
         musicname = name + " - " + artist.replace("/", ",")
     musicname = musicname.replace("/", "／").replace("\\", "＼").replace(":", "：").replace("*", "＊").replace("/", "/").replace("?", "？").replace("\"", "＂").replace("<", "＜").replace(">", "＞").replace("|", "｜")
     downloadpath = path + "/" + musicname
-    download_now_and_all = "第{}首，共{}首".format(number_now_and_all[0], number_now_and_all[1])
+    download_now_and_all = "第{}首，共{}首".format(num_now, num_all)
     downloading_frame.set_text("正在下载\n{}\n({})".format(musicname, download_now_and_all))
     if setting_dict["download_music_ornot"]:
-        musiclink = "http://music.163.com/song/media/outer/url?id={}".format(id)
-        music_success = download(musiclink, downloadpath + ".mp3", "音乐")
+        music_success = download(music_link, downloadpath + ".mp3", "音乐")
         if music_success == None:
             return
     if setting_dict["download_music_ornot"] or setting_dict["download_image_ornot"]:
-        image_success = download(imagelink, downloadpath + ".jpg", "图片")
+        image_success = download(image_link, downloadpath + ".jpg", "图片")
     if setting_dict["download_lyric_ornot"]:
         lyric_success = download_lyric(id, downloadpath)
     if setting_dict["download_music_ornot"] and music_success:
@@ -117,9 +148,7 @@ def download_name(id, path, number_now_and_all, id_type):
             error("错误原因：无法修改歌曲的音乐标签。")
             return
         else:
-            if id_type == "music":
-                download_done = "下载成攻！我绝对不是故意打错字的喵(^･ｪ･^)音乐已保存为\n{}.mp3\n至目录  {}\n（若发现文件不正确，请在确认操作正确后联系开发者。）".format(musicname, path.replace("/", "\\"))
-                downloading_frame.set_text(download_done)
+            return True
 
 
 class give(MD_wx_GUI.frame_give):
@@ -252,28 +281,7 @@ class main(MD_wx_GUI.frame_main):
             number_now_and_all = [1, 1]
             download_name(id, path, number_now_and_all, id_type)
         elif id_type == "playlist":
-            link_playlist = "https://api.imjad.cn/cloudmusic/?type=playlist&id={}".format(id)
-            try:
-                playlist_req = requests.get(link_playlist, headers=HEADERS).text
-                playlist = json.loads(playlist_req)
-            except:
-                error("错误原因：获取音乐信息失败。请检查网络是否正常。")
-            code_playlist = playlist["code"]
-            if code_playlist == 200:
-                name_playlist = "{} 的 {}".format(playlist["playlist"]["creator"]["nickname"], playlist["playlist"]["name"])
-                id_playlist = [id["id"] for id in playlist["playlist"]["trackIds"]]
-                for number_now, id in enumerate(id_playlist, 1):
-                    number_now_and_all = [number_now, len(id_playlist)]
-                    download_name(id, path, number_now_and_all, id_type)
-                    if downloading_cancel:return
-                download_done = "全部下载成攻！我绝对不是故意打错字的喵(^･ｪ･^)此歌单的音乐已保存至目录\n{}\n（若发现文件不正确，请在确认操作正确后联系开发者。）".format(path.replace("/", "\\"))
-                downloading_frame.set_text(download_done)
-            elif code_playlist == 404:
-                error("错误原因：没有此歌单")
-            else:
-                error("获取歌单信息时发生未知错误，code:{}".format(code_playlist))
-        else:
-            error("错误！x73x68 TYPE ERROR")
+            get_info_and_start(path, id, id_type)
         
     
     def show_setting(self, event):
@@ -284,12 +292,75 @@ class main(MD_wx_GUI.frame_main):
         setting_app.MainLoop()
         sys.exit()
     
+    def show_ncm(self, event):
+        
+        ncm_app = wx.App()
+        ncm_frame = ncm(None)
+        ncm_frame.set_list()
+        ncm_frame.Show()
+        ncm_app.MainLoop()
+        sys.exit()
+    
     def show_about(self, event):
         about_app = wx.App()
         about_frame = about(None)
         about_frame.Show()
         about_app.MainLoop()
         sys.exit()
+
+
+class ncm(MD_wx_GUI.frame_ncm):
+    def set_list(self):
+        self.listCtrl.InsertColumn(0, "文件名")
+        self.listCtrl.SetColumnWidth(0, 114)
+        self.listCtrl.InsertColumn(1, "进度")
+        self.listCtrl.SetColumnWidth(1, 50)
+        self.listCtrl.InsertColumn(2, "名字")
+        self.listCtrl.InsertColumn(3, "歌手")
+        self.listCtrl.InsertColumn(4, "专辑名")
+        self.ncm_info_list = []
+    
+    def add_files(self, event):
+        dialog = wx.FileDialog(self, "选择多个ncm文件", style=wx.FD_OPEN | wx.FD_MULTIPLE, wildcard="*.ncm")
+        if dialog.ShowModal() == wx.ID_OK:
+            list_ncm = dialog.GetPaths()
+            for i in list_ncm:
+                index = self.listCtrl.InsertItem(self.listCtrl.GetItemCount(), i)
+                meta, key_box, image_data, seek_after_meta = ncm_dump.get_meta(i)
+                
+                self.ncm_info_list.append([i, index, meta, key_box, image_data, seek_after_meta])
+                name = meta["musicName"]
+                artist = ", ".join([k[0] for k in meta["artist"]])
+                album = meta["album"]
+                self.listCtrl.SetItem(index, 1, "0%")
+                self.listCtrl.SetItem(index, 2, name)
+                self.listCtrl.SetItem(index, 3, artist)
+                self.listCtrl.SetItem(index, 4, album) 
+    
+    def recv_queue(self, queue:multiprocessing.Queue):
+        done_num = 0
+        total_num = len(self.ncm_info_list)
+        while True:
+            index, percent = queue.get()
+            self.listCtrl.SetItem(index, 1, f"{percent}%")
+            if percent == 100:
+                done_num += 1
+                total_percent = floor(done_num / total_num * 100)
+                self.gauge_all.SetValue(total_percent)
+                if done_num == total_num:
+                    wx.MessageBox(u"全部转换成攻！我绝对不是故意打错字的喵(^･ｪ･^)", u"转换成攻！", wx.OK)
+                    break
+    
+    def start_convert(self, event):
+        pool = multiprocessing.Pool()
+        queue = multiprocessing.Manager().Queue()
+        for i in self.ncm_info_list:
+            pool.apply_async(start_dump, args=(i, queue))
+        threading.Thread(target=self.recv_queue, args=(queue, )).start()
+        
+    
+def start_dump(ncm_info, queue):
+    ncm_dump.dump(setting_dict["path"].replace("\\", "/"), *ncm_info, queue)
 
 
 DATA_PATH = os.path.expanduser("~/AppData/Local/Music Downloader/User Data/").replace("\\", "/")
@@ -325,8 +396,9 @@ if not exist_give_img:
     with open(DATA_PATH + "img/give_img.png", "wb") as main_icon:
         main_icon.write(MD_img_py.give_img)
 
-main_app = wx.App()
-main_frame = main(None)
-main_frame.icon()
-main_frame.Show()
-main_app.MainLoop()
+if __name__ == "__main__":
+    main_app = wx.App()
+    main_frame = main(None)
+    main_frame.icon()
+    main_frame.Show()
+    main_app.MainLoop()
