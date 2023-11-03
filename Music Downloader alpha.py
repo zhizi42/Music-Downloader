@@ -443,7 +443,7 @@ match os_name:
     case "Darwin":
         DATA_PATH = os.path.expanduser("~/Library/Application Support/Music Downloader/").replace("\\", "/")
     case "Linux":
-        DATA_PATH = os.path.expanduser("~/Music Downloader/").replace("\\", "/")
+        DATA_PATH = os.path.expanduser("~/.Music Downloader/").replace("\\", "/")
 
 HEADERS = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36"}
 FIRST_DATA = {"path": os.path.expanduser("~/Desktop"), "name_version_pc": True,
