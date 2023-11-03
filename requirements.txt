@@ -1,0 +1,4 @@
+mutagen
+requests
+wxpython
+pycryptodome
